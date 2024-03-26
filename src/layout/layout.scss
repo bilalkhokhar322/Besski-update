@@ -1,0 +1,31 @@
+#layout {
+  width: 100%;
+  min-height: 100vh;
+  background-image: url("../assets/Image/bg3.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  .container {
+    width: 100%;
+    height: 100vh !important;
+    .row {
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      .col-md-7 {
+        padding: 50px 30px;
+        border-radius: 4%;
+        backdrop-filter: blur(20px);
+        background-color: rgba(255, 255, 255, 0.5);
+        .row {
+        }
+      }
+    }
+  }
+}
+
+.button1 {
+  border: none !important;
+  background-image: linear-gradient(to right, red, rgb(255, 102, 0));
+}

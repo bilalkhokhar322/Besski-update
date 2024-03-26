@@ -1,0 +1,11 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+$error-color: #ff0000; // Red color for error message
+
+#error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
