@@ -20,13 +20,13 @@ import {
   Form,
   Button,
 } from "reactstrap";
+import { clear } from "@testing-library/user-event/dist/clear";
 
 const EditPage = () => {
   const navigate = useNavigate();
   const getEditData = useLocation();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [categories, setcategories] = useState([]);
-
   const [keyWords, setkeyWords] = useState(
     getEditData.state.keyWords ? getEditData.state.keyWords : []
   );
@@ -39,16 +39,19 @@ const EditPage = () => {
     title: Yup.string().trim().required("Title is required"),
     situation: Yup.string().trim().required("Situation is required"),
     artist: Yup.string().trim().required("Artist is required"),
+    library: Yup.string().trim().required("Language is required"),
   });
 
   const params = useParams();
 
   const updateSong = async (values) => {
+    setLoading(true);
     if (categories.length == 0) {
       toast.error("At least one categories is required");
       return;
     } else {
       const formData = new FormData();
+      formData.append("inspiration", JSON.stringify([]));
       formData.append("categories", JSON.stringify(categories));
       formData.append("keyWords", JSON.stringify(keyWords));
       formData.append("avatar", values.avatar);
@@ -56,6 +59,7 @@ const EditPage = () => {
       formData.append("title", values.title);
       formData.append("situation", values.situation);
       formData.append("artist", values.artist);
+      formData.append("library", values.library);
 
       try {
         const response = await axios.put(
@@ -87,12 +91,14 @@ const EditPage = () => {
         situation: getEditData.state.situation
           ? getEditData.state.situation
           : "",
+        library: getEditData.state.library ? getEditData.state.library : "",
       },
       validationSchema: validation,
       onSubmit: updateSong,
     });
 
   const GetSingleSong = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`/admin/singleSound/${params.id}`, {
         headers: {
@@ -100,10 +106,13 @@ const EditPage = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      setLoading(false);
       setSong(response.data);
       setkeyWords(response.data.data.music.keyWords);
       setcategories(response.data.data.music.categoryIds);
     } catch (error) {
+      setLoading(false);
+
       console.log(error);
     }
   };
@@ -143,6 +152,10 @@ const EditPage = () => {
     setkeyWords(e);
   };
 
+  const ClearCategories = () => {
+    setcategories([]);
+  };
+
   useEffect(() => {
     GetSingleSong();
     getCategories();
@@ -166,7 +179,9 @@ const EditPage = () => {
       setUseCategories(cats);
       setLoading(false);
     }
-  }, [categories]);
+  }, [categories, getCategoriesData]);
+
+  console.log(values.library);
 
   return (
     <>
@@ -189,6 +204,97 @@ const EditPage = () => {
                 <Col xs={12} className="mainCol rounded-4 GetData py-5 px-4">
                   <Row className="mainColRow p-0 m-0 justify-content-center align-content-between">
                     <Col lg={4} md={4} sm={5} className="">
+                      <FormGroup>
+                        <Row>
+                          <Col sm={12}>
+                            <Label className="fw-bold custom-label text-white">
+                              Choose Library
+                            </Label>
+                          </Col>
+                          <Col sm={6} className="d-flex align-items-center">
+                            <div
+                              className=""
+                              onClick={() => {
+                                if (values?.library !== "English") {
+                                  ClearCategories();
+                                }
+                              }}
+                            >
+                              <input
+                                id="english"
+                                type="checkbox"
+                                className="mt-0"
+                                onChange={() =>
+                                  setFieldValue("library", "English")
+                                }
+                                checked={
+                                  values.library == "English" ? true : false
+                                }
+                                style={{
+                                  cursor: "pointer",
+                                  margin: "4px 0 0",
+                                  lineHeight: "normal",
+                                  width: "20px ",
+                                  height: "20px ",
+                                }}
+                              />
+                              <Label
+                                htmlFor="english"
+                                className=" p-0 m-0 ps-2 fw-bold custom-label text-white"
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                              >
+                                English
+                              </Label>
+                            </div>
+                          </Col>
+                          <Col
+                            sm={6}
+                            className="d-flex align-items-center justify-content-center"
+                          >
+                            <div
+                              className=""
+                              onClick={() => {
+                                if (values?.library !== "French") {
+                                  ClearCategories();
+                                }
+                              }}
+                            >
+                              <input
+                                id="french"
+                                type="checkbox"
+                                onChange={() =>
+                                  setFieldValue("library", "French")
+                                }
+                                checked={
+                                  values.library == "French" ? true : false
+                                }
+                                className="mt-0"
+                                style={{
+                                  cursor: "pointer",
+                                  margin: "4px 0 0",
+                                  lineHeight: "normal",
+                                  width: "20px ",
+                                  height: "20px ",
+                                }}
+                              />
+                              <Label
+                                htmlFor="french"
+                                className=" p-0 m-0 ps-2 fw-bold custom-label text-white"
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                              >
+                                French
+                              </Label>
+                            </div>
+                          </Col>
+                          <p className="text-danger">
+                            {errors.library ? errors.library : ""}
+                          </p>
+                        </Row>
+                      </FormGroup>
                       <FormGroup id="File-upload">
                         <Label className="fw-bold custom-label text-white">
                           Select the only audio file . . .
@@ -222,104 +328,124 @@ const EditPage = () => {
                       </FormGroup>
                     </Col>
                     <Col lg={1} className="d-lg-block d-none p-0"></Col>
-                    <Col lg={7} md={8} sm={7} className="">
-                      <FormGroup>
-                        <Input
-                          type="text"
-                          name="title"
-                          id="title"
-                          value={values?.title}
-                          placeholder="Title Name"
-                          onChange={handleChange}
-                        />
-                        <p className="text-danger">
-                          {errors.title ? errors.title : ""}
-                        </p>
-                      </FormGroup>
+                    <Col
+                      lg={7}
+                      md={8}
+                      sm={7}
+                      className="d-flex justify-content-center align-items-center flex-column"
+                    >
+                      <div className="w-100">
+                        <FormGroup>
+                          <Input
+                            type="text"
+                            name="title"
+                            id="title"
+                            value={values?.title}
+                            placeholder="Title Name"
+                            onChange={handleChange}
+                          />
+                          <p className="text-danger">
+                            {errors.title ? errors.title : ""}
+                          </p>
+                        </FormGroup>
 
-                      <FormGroup>
-                        <textarea
-                          className="form-control"
-                          name="situation"
-                          id="situation"
-                          rows={3}
-                          value={values?.situation}
-                          placeholder="Situation"
-                          onChange={handleChange}
-                        />
-                        <p className="text-danger">
-                          {errors.situation ? errors.situation : ""}
-                        </p>
-                      </FormGroup>
+                        <FormGroup>
+                          <textarea
+                            className="form-control"
+                            name="situation"
+                            id="situation"
+                            rows={3}
+                            value={values?.situation}
+                            placeholder="Situation"
+                            onChange={handleChange}
+                          />
+                          <p className="text-danger">
+                            {errors.situation ? errors.situation : ""}
+                          </p>
+                        </FormGroup>
 
-                      <FormGroup>
-                        <Input
-                          type="text"
-                          name="artist"
-                          id="artist"
-                          value={values?.artist}
-                          placeholder={"Artist Name"}
-                          onChange={handleChange}
-                        />
-                        <p className="text-danger">
-                          {errors.artist ? errors.artist : ""}
-                        </p>
-                      </FormGroup>
-                      <FormGroup>
-                        <Input
-                          type="text"
-                          name="movieName"
-                          id="movie"
-                          value={values?.movieName}
-                          placeholder={"Movie Name"}
-                          onChange={handleChange}
-                        />
-                        <p className="text-danger">
-                          {errors.movieName ? errors.movieName : ""}
-                        </p>
-                      </FormGroup>
+                        <FormGroup>
+                          <Input
+                            type="text"
+                            name="artist"
+                            id="artist"
+                            value={values?.artist}
+                            placeholder={"Artist Name"}
+                            onChange={handleChange}
+                          />
+                          <p className="text-danger">
+                            {errors.artist ? errors.artist : ""}
+                          </p>
+                        </FormGroup>
+                        <FormGroup>
+                          <Input
+                            type="text"
+                            name="movieName"
+                            id="movie"
+                            value={values?.movieName}
+                            placeholder={"Movie Name"}
+                            onChange={handleChange}
+                          />
+                          <p className="text-danger">
+                            {errors.movieName ? errors.movieName : ""}
+                          </p>
+                        </FormGroup>
+                      </div>
                     </Col>
                     <>
                       <Col sm={12} className="p-0 ps-3 ">
                         <Row className="m-0 p-0 ">
                           <p className="fw-bold text-white p-0">Categories</p>
                           <>
-                            {console.log(getCategoriesData, "categories")}
                             {getCategoriesData &&
-                              getCategoriesData?.map((item, index) => (
-                                <>
-                                  <Col
-                                    xs={4}
-                                    className="  p-0 m-0 mb-3 d-flex align-items-center ju text-white"
-                                  >
-                                    <input
-                                      key={index}
-                                      type="checkbox"
-                                      id={item.id}
-                                      className="mt-0"
-                                      name={item.Name}
-                                      onChange={(e) => handleCategories(e)}
-                                      style={{
-                                        cursor: "pointer",
-                                        margin: "4px 0 0",
-                                        lineHeight: "normal",
-                                        width: "20px ",
-                                        height: "20px ",
-                                      }}
-                                      checked={item.selected}
-                                    />
-                                    &nbsp;&nbsp;
-                                    <label
-                                      htmlFor={item.id}
-                                      style={{
-                                        cursor: "pointer",
-                                      }}
+                              getCategoriesData
+                                ?.filter(
+                                  (inspi) => inspi?.library === values?.library
+                                )
+                                .map((item, index) => (
+                                  <>
+                                    <Col
+                                      xs={2}
+                                      className="  p-0 m-0 mb-3 d-flex align-items-center ju text-white"
                                     >
-                                      {item.Name}
-                                    </label>
-                                  </Col>
-                                </>
-                              ))}
+                                      <abbr
+                                        title={item.Name}
+                                        className="d-flex text-decoration-none"
+                                      >
+                                        <input
+                                          key={index}
+                                          type="checkbox"
+                                          id={item.id}
+                                          className="mt-0"
+                                          name={item.Name}
+                                          onChange={(e) => handleCategories(e)}
+                                          style={{
+                                            cursor: "pointer",
+                                            margin: "4px 0 0",
+                                            lineHeight: "normal",
+                                            width: "20px ",
+                                            height: "20px ",
+                                            padding: "20px",
+                                          }}
+                                          checked={item.selected}
+                                        />
+                                        &nbsp;&nbsp;
+                                        <label
+                                          htmlFor={item.id}
+                                          style={{
+                                            cursor: "pointer",
+                                            overflow: "hidden",
+                                            textWrap: "nowrap",
+                                            textOverflow: "ellipsis",
+                                            width: "136px",
+                                          }}
+                                        >
+                                          {item.Name}
+                                        </label>
+                                      </abbr>
+                                    </Col>
+                                  </>
+                                ))}
                           </>
                         </Row>
                       </Col>

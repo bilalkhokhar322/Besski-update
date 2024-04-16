@@ -39,10 +39,9 @@ const CategoriesPage = () => {
   const [avatarError, setAvatarError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [languageError, setLanguageError] = useState(false);
-  // const [addLanguage, setAddLangusge] = useState("");
   const [soundData, setSoundData] = useState({
     name: "",
-    lang: "",
+    library: "",
     avatar: null,
   });
   console.log(soundData);
@@ -117,7 +116,7 @@ const CategoriesPage = () => {
       soundData?.avatar ? soundData?.avatar : showModalEditImage
     );
 
-    if (soundData?.name !== "" || soundData?.lang !== "") {
+    if (soundData?.name !== "" || soundData?.library !== "") {
       axios
         .put(`/admin/updateCategory/${currentIndex}`, updatedSoundBody, {
           headers: {
@@ -140,7 +139,7 @@ const CategoriesPage = () => {
           toast.error(error?.message);
         });
     } else {
-      if (soundData?.name === "" && soundData?.lang === "") {
+      if (soundData?.name === "" && soundData?.library === "") {
         setNameError(true);
         setLanguageError(true);
       }
@@ -151,30 +150,30 @@ const CategoriesPage = () => {
   const resetSoundData = () => {
     setSoundData({
       name: "",
-      lang: "",
+      library: "",
       avatar: null,
     });
   };
 
   const addSound = () => {
     console.log(soundData?.name);
-    if (!soundData?.name && !soundData?.avatar && !soundData?.lang) {
+    if (!soundData?.name && !soundData?.avatar && !soundData?.library) {
       console.log(soundData);
       setNameError(true);
       setAvatarError(true);
       setLanguageError(true);
       return;
-    } else if (!soundData?.avatar && soundData?.name && soundData?.lang) {
+    } else if (!soundData?.avatar && soundData?.name && soundData?.library) {
       setAvatarError(true);
       setNameError(false);
       setLanguageError(false);
       return;
-    } else if (!soundData?.name && soundData?.avatar && soundData?.lang) {
+    } else if (!soundData?.name && soundData?.avatar && soundData?.library) {
       setNameError(true);
       setAvatarError(false);
       setLanguageError(false);
       return;
-    } else if (!soundData?.lang && soundData?.name && soundData?.avatar) {
+    } else if (!soundData?.library && soundData?.name && soundData?.avatar) {
       setLanguageError(true);
       setAvatarError(false);
       setNameError(false);
@@ -184,7 +183,7 @@ const CategoriesPage = () => {
     const addSoundBody = new FormData();
     addSoundBody.append("name", soundData?.name);
     addSoundBody.append("avatar", soundData?.avatar);
-    addSoundBody.append("lang", soundData?.lang);
+    addSoundBody.append("library", soundData?.library);
     addSoundBody.append("releaseDate", "12-12-1222");
 
     if (!avatarError && !nameError && !languageError) {
@@ -570,11 +569,11 @@ const CategoriesPage = () => {
                     onChange={() => {
                       setSoundData({
                         ...soundData,
-                        lang: "English",
+                        library: "English",
                       });
                       setLanguageError(false);
                     }}
-                    checked={soundData?.lang == "English" ? true : false}
+                    checked={soundData?.library == "English" ? true : false}
                     style={{
                       cursor: "pointer",
                       margin: "4px 0 0",
@@ -604,11 +603,11 @@ const CategoriesPage = () => {
                     onChange={() => {
                       setSoundData({
                         ...soundData,
-                        lang: "French",
+                        library: "French",
                       });
                       setLanguageError(false);
                     }}
-                    checked={soundData?.lang === "French" ? true : false}
+                    checked={soundData?.library === "French" ? true : false}
                     className="mt-0"
                     style={{
                       cursor: "pointer",

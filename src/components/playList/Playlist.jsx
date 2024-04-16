@@ -39,6 +39,7 @@ const PlayList = () => {
   const [loading, setLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
 
+  const [activeLan, setActiveLan] = useState("English");
   const [totalPages, setTotalPages] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -258,12 +259,15 @@ const PlayList = () => {
   const getAllSongs = () => {
     setLoading(true);
     axios
-      .get(`/admin/getAllSounds?page=${currentPage}&size=${postsPerPage}`, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get(
+        `/admin/getAllSounds?page=${currentPage}&size=${postsPerPage}&lan=${activeLan}`,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
 
       .then((response) => {
         setTableData(response.data?.data?.music?.rows);
@@ -283,7 +287,7 @@ const PlayList = () => {
 
   useEffect(() => {
     getAllSongs();
-  }, [currentPage]);
+  }, [currentPage, activeLan]);
 
   const editRow = (index) => {
     setSoundData({
@@ -371,7 +375,46 @@ const PlayList = () => {
                   </Link>
                 </div>
               </Col>
-              <Col sm={2} xs={1} className="addTable ">
+              <Col sm={1} xs={1} className="addTable">
+                <div
+                  className="h-100 w-100 d-flex justify-content-center"
+                  style={{
+                    fontSize: "14px",
+                    color: "#fff",
+                    boxShadow: "none",
+                  }}
+                  onClick={() => setActiveLan("English")}
+                >
+                  <Link
+                    // to="/categories"
+                    className={`${
+                      activeLan === "English" && "button1"
+                    } text-decoration-none d-flex justify-content-center align-items-center text-white w-100 border rounded-2`}
+                  >
+                    English
+                  </Link>
+                </div>
+              </Col>
+              <Col sm={1} xs={1} className="addTable">
+                <div
+                  className="h-100 w-100 d-flex justify-content-center"
+                  style={{
+                    fontSize: "14px",
+                    color: "#fff",
+                    boxShadow: "none",
+                  }}
+                  onClick={() => setActiveLan("French")}
+                >
+                  <Link
+                   className={`${
+                    activeLan === "French" && "button1 "
+                  } text-decoration-none d-flex justify-content-center align-items-center text-white w-100 border rounded-2`}
+                >
+                    French
+                  </Link>
+                </div>
+              </Col>
+              <Col sm={2} xs={1} className="addTable d-none">
                 <div
                   className="h-100 w-100 d-flex justify-content-center"
                   style={{
